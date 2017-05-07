@@ -3,9 +3,18 @@
 /// An iterator that only iterates over the first `n` iterations of `iter`.
 ///
 /// This `struct` is created by the `take()` method on `Iterrator`
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+#[derive(Clone)]
 pub struct Take<I>{
     iter: I,
     n: usize,
+}
+
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+#[derive(Clone)]
+pub struct Map<I,F>{
+    iter: I,
+    f: F,
 }
 
 /// An iterator which may or may not succeed to advance to its next element
@@ -19,14 +28,8 @@ pub trait Iterrator{
     /// finished, otherwise `Ok(Some(Item))` is returned.
     fn next(&mut self) -> Result<Option<Self::Item>, Self::Error>;
 
-    fn take(self, n: usize) -> Take<Self> where
-        Self: Sized
-    {
-        Take{iter: self, n}
-    }
-
     /// An iterator adaptor that applies a function, producing a single, final value.
-    fn fold<B, F>(mut self, init:B, mut f:F) -> Result<B, Self::Error> where
+    fn fold<B, F>(mut self, init:B, mut f: F) -> Result<B, Self::Error> where
         Self: Sized, F: FnMut(B, Self::Item) -> B
     {
         let mut accum = init;
@@ -34,6 +37,20 @@ pub trait Iterrator{
             accum = f(accum, x);
         }
         Ok(accum)
+    }
+
+    /// Takes a closure and creates an iterator which calls that closure on each element.
+    fn map<F>(self, f: F) -> Map<Self, F> where
+        Self: Sized
+    {
+        Map{iter: self, f}
+    }
+
+    /// Creates an iterator that yields its first n elements.
+    fn take(self, n: usize) -> Take<Self> where
+        Self: Sized
+    {
+        Take{iter: self, n}
     }
 }
 
@@ -48,6 +65,18 @@ impl<I> Iterrator for Take<I> where I: Iterrator{
         } else {
             Ok(None)
         }
+    }
+}
+
+impl<B, I, F> Iterrator for Map<I,F> where
+    I: Iterrator,
+    F: FnMut(I::Item) -> B
+{
+    type Item = B;
+    type Error = I::Error;
+
+    fn next(&mut self) -> Result<Option<B>, Self::Error> {
+        Ok(self.iter.next()?.map(&mut self.f))
     }
 }
 
