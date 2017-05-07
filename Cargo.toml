@@ -2,5 +2,20 @@
 name = "iterrator"
 version = "0.1.0"
 authors = ["Markus Klein <markus-klein@live.de>"]
+license = "MIT"
+
+# A short blurb about the package. This is not rendered in any format when
+# uploaded to crates.io (aka this is not markdown).
+description = "Traits and helpers for iterators which may fail to advance"
+
+# This is a list of up to five keywords that describe this crate. Keywords
+# are searchable on crates.io, and you may choose any words that would
+# help someone find this crate.
+keywords = ["iterator"]
+
+# This is a list of up to five categories where this crate would fit.
+# Categories are a fixed list available at crates.io/category_slugs, and
+# they must match exactly.
+categories = ["rust-patterns"]
 
 [dependencies]
